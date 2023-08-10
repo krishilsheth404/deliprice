@@ -6,7 +6,6 @@ const bodyParser = require('body-parser'); // Middleware
 const cheerio = require('cheerio');
 const axios = require('axios');
 const { raw } = require('body-parser');
-const { google } = require('reverse-image-search');
 
 var urlForZomato = `https://www.bing.com/maps?q=chemist+shops+in%20400009`;
 // urlForZomato = urlForZomato.split(' ').join('+')
