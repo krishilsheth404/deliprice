@@ -33,87 +33,43 @@ app.post('/', (req, res) => {
 
 app.post('/result', async (req, res) => {
     // Insert Login Code Here   
-    const nameOfMed = req.body.dataOfMed + '\n';
 
-
-
-    // Fetching HTML
-
-    // const browser = await puppeteer.launch({ headless: false });
-    const browser = await puppeteer.launch({
-        headless: false,
-        args: [
-            '--no-sandbox',
-            '--disable-setuid-sandbox',
-        ]
-
-    })
-    const page = await browser.newPage();
-
-
-    console.log('typeing')
-    try {
-        
-        await page.goto(`https://yandex.com/images/search?rpt=imageview&url=https://i.imgur.com/XLXBB9z.jpg`);
-        const data = await page.evaluate(() => document.querySelector('*').outerHTML);
-
-
-        const $ = cheerio.load(data, { xmlMode: false });
-        
-        $('.CbirSection-Title').map((i, elm) => {
-           if($(elm).text()=="Image appears to contain"){
-            console.log('yes')
-
-
-               $(elm).next().map((i, elm) => {
-                   console.log($(elm).text());
-               });
-           }
-        });
-        
+        const browser = await puppeteer.launch({ headless: false });
     
-
-        // await page.$eval(('img[class=img-responsive]'), node => node.src);
-    } catch (e) {
-        console.log(e);
-    }
-    // await page.type('input[placeholder=Enter Image URL]');
-
-    // try {
-    //     const data = await page.evaluate(() => document.querySelector('*').outerHTML);
-
-    //     var $ = cheerio.load(data);
-    //     console.log($.html())
-    //     await page.waitForSelector('.tit');
-    //     $('.tit').map(async (i, elm) => {
-    //         console.log($(elm).text());
-    //     })//for city
-    //     await browser.close();
-
-    // } catch (error) {
-    //     console.log(error)
-    // }
-
-
-
-
-
-
-
-
-    // const data = await page.evaluate(() => document.querySelector('*').outerHTML);
-    //     console.log("got the link for zomato");
-    // console.log(data)
-    // await page.close();
-    // const data=await axios.get(url);
-    // Using cheerio to extract <a> tags
-    // const $ = cheerio.load(data);
-    // console.log($.html())
-
-
-
-    console.log('final---' + z);
-
+        const page = await browser.newPage();
+        await page.goto('https://quotes.toscrape.com/search.aspx');
+    
+        await page.waitForSelector('#author');
+        await page.select('#author', 'Albert Einstein');
+    
+        await page.waitForSelector('#tag');
+        await page.select('#tag', 'learning');
+    
+        await page.click('.btn');
+        await page.waitForSelector('.quote');
+    
+        // extracting information from code
+        let quotes = await page.evaluate(() => {
+    
+            let quotesElement = document.body.querySelectorAll('.quote');
+            let quotes = Object.values(quotesElement).map(x => {
+                return {
+                    author: x.querySelector('.author').textContent ?? null,
+                    quote: x.querySelector('.content').textContent ?? null,
+                    tag: x.querySelector('.tag').textContent ?? null,
+    
+                }
+            });
+    
+            return quotes;
+    
+        });
+    
+        // logging results
+        console.log(quotes);
+        await browser.close();
+    
+    
 });
 
 const port = process.env.PORT || 3000 // Port we will listen on
