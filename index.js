@@ -1,77 +1,123 @@
+//dunzo parcel price getter automation
+const puppeteer = require('puppeteer')
 const express = require('express'); // Include ExpressJS
 const app = express(); // Create an ExpressJS app
 const bodyParser = require('body-parser'); // Middleware 
-const axios = require('axios')
-const cheerio = require('cheerio')
-// const puppeteer = require('puppeteer');
-// const request = require('request');
-// const fs = require('fs');
-const ejs = require("ejs");
-// const { AddressContext } = require('twilio/lib/rest/api/v2010/account/address');
-const { getElementsByTagType } = require('domutils');
+const cheerio = require('cheerio');
+const axios = require('axios');
+const { raw } = require('body-parser');
+const { google } = require('reverse-image-search');
+
+var urlForZomato = `https://www.bing.com/maps?q=chemist+shops+in%20400009`;
+// urlForZomato = urlForZomato.split(' ').join('+')
 
 app.set('view engine', 'ejs');
-app.set('views',__dirname);
+// app.set('views', './');
 
-app.use(bodyParser.urlencoded({ extended: false }));  //*//
+var urlForSwiggy, urlForZomato;
+var extractLinksOfSwiggy, extractLinksOfZomato, matchedDishes = {};
+var matchedDishesForSwiggy, matchedDishesForZomato, tempAddress, discCodesForZomato, addr, linkOld = '';
+var z, s, w;
+var sdfd, tempurl, tempurl2;
+var Offers = 0;
+var final = [];
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 // var newItem;
 // Route to Login Page
 app.get('/', (req, res) => {
-    // console.log(res)
-    res.sendFile(__dirname + '/login.html');
+    res.sendFile(__dirname + '/index.html');
+});
+app.post('/', (req, res) => {
+    res.sendFile(__dirname + '/index.html');
 });
 
-// app.post('/', (req, res) => {
-//     res.sendFile(__dirname + '/login.html');
-// });
+app.post('/result', async (req, res) => {
+    // Insert Login Code Here   
+    const nameOfMed = req.body.dataOfMed + '\n';
 
-app.post('/result', async(req, res) => {
 
-    // app.get('/', (req, res) => {
 
-    const final = []
+    // Fetching HTML
 
-    extractLinkFromBing = async (url) => {
+    // const browser = await puppeteer.launch({ headless: false });
+    const browser = await puppeteer.launch({
+        headless: false,
+        args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+        ]
+
+    })
+    const page = await browser.newPage();
+
+
+    console.log('typeing')
     try {
-        // Fetching HTML
-        const { data } = await axios.get(url)
-        // console.log(typeof(data));
-        // console.log(data)
-
-        // Using cheerio to extract <a> tags
-        const $ = cheerio.load(data);
-        console.log($.html());
-
-        const rawUrl = $('li[class=b_algo] h2 a').first().attr('href');
-        console.log(rawUrl);
-        if (rawUrl != undefined) {
-            return rawUrl
-        } else {
-            return '';
-        }
-        // url = rawUrl.split("/url?q=")[1].split("&")[0];
-        // console.log('Extracting url: ', url);
+        
+        await page.goto(`https://yandex.com/images/search?rpt=imageview&url=https://i.imgur.com/XLXBB9z.jpg`);
+        const data = await page.evaluate(() => document.querySelector('*').outerHTML);
 
 
-    } catch (error) {
-        // res.sendFile(__dirname + '/try.html');
-        // res.sendFile(__dirname + '/error.html');
-        console.log(error);
-        return {};
+        const $ = cheerio.load(data, { xmlMode: false });
+        
+        $('.CbirSection-Title').map((i, elm) => {
+           if($(elm).text()=="Image appears to contain"){
+            console.log('yes')
+
+
+               $(elm).next().map((i, elm) => {
+                   console.log($(elm).text());
+               });
+           }
+        });
+        
+    
+
+        // await page.$eval(('img[class=img-responsive]'), node => node.src);
+    } catch (e) {
+        console.log(e);
     }
-};
+    // await page.type('input[placeholder=Enter Image URL]');
 
-    const s = req.body.search + '\n';
-    console.log(s)
-    final.push(s);
+    // try {
+    //     const data = await page.evaluate(() => document.querySelector('*').outerHTML);
 
-    await extractLinkFromBing(`https://www.bing.com/search?q=${s}&ad=dirN&o=0`)
-    res.render(__dirname+'/final', { final: final })
+    //     var $ = cheerio.load(data);
+    //     console.log($.html())
+    //     await page.waitForSelector('.tit');
+    //     $('.tit').map(async (i, elm) => {
+    //         console.log($(elm).text());
+    //     })//for city
+    //     await browser.close();
 
+    // } catch (error) {
+    //     console.log(error)
+    // }
+
+
+
+
+
+
+
+
+    // const data = await page.evaluate(() => document.querySelector('*').outerHTML);
+    //     console.log("got the link for zomato");
+    // console.log(data)
+    // await page.close();
+    // const data=await axios.get(url);
+    // Using cheerio to extract <a> tags
+    // const $ = cheerio.load(data);
+    // console.log($.html())
+
+
+
+    console.log('final---' + z);
 
 });
-const port = process.env.PORT || 1000 // Port we will listen on
+
+const port = process.env.PORT || 3000 // Port we will listen on
 
 // Function to listen on the port
 app.listen(port, () => console.log(`This app is listening on port ${port}`));
