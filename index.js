@@ -39,8 +39,7 @@ app.post('/result', async (req, res) => {
             '--no-sandbox',
             '--disable-setuid-sandbox',
         ],
-        channel: 'chrome',
-        
+      
 
     })
     const page = await browser.newPage();
